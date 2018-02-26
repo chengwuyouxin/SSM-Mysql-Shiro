@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <description>Shiro Configuration</description>
+
+    <!--Shiro Filter-->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/login"/>
+        <property name="successUrl" value="/index"/>
+        <property name="unauthorizedUrl" value="/unauthorized"/>
+        <property name="filterChainDefinitions">
+            <value>
+                <!--
+                    anon  不需要认证
+                    authc 需要认证
+                    user  验证通过或RememberMe登录的都可以
+                -->
+                /captcha = anon
+                /commons/** = anon
+                /css/** = anon
+                /js/** = anon
+                /login = anon
+                /register=anon
+                /** = user
+            </value>
+        </property>
+    </bean>
+
+    <!--SecurityManager-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="libraryShiroRealm"/>
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="sessionManager" ref="sessionManager"/>
+        <property name="rememberMeManager" ref="rememberMeManager"/>
+    </bean>
+
+    <!--ShiroRealm-->
+    <bean id="libraryShiroRealm" class="com.lpq.personallibrary.shiro.LibraryShiroRealm">
+        <constructor-arg name="credentialsMatcher" ref="retryLimitCredentialsMatcher"/>
+    </bean>
+
+    <!--cacheManager-->
+    <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManagerConfigFile" value="classpath:config/ehcache-config.xml"/>
+    </bean>
+
+    <!--sessionManager-->
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <!--Session最长有效时间-->
+        <property name="globalSessionTimeout" value="#{30*60*1000}"/>
+        <!--删除无效session-->
+        <property name="deleteInvalidSessions" value="true"/>
+    </bean>
+
+    <!--rememberMeManager-->
+    <bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+        <property name="cookie" ref="rememberMeCookie"/>
+    </bean>
+
+    <!-- 记住密码Cookie -->
+    <bean id="rememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <constructor-arg value="rememberMe"/>
+        <property name="httpOnly" value="true"/>
+        <!-- 7天,采用spring el计算方便修改 -->
+        <property name="maxAge" value="#{7 * 24 * 60 * 60}"/>
+    </bean>
+
+    <!--密码加密方法及次数-->
+    <bean id="passwordHashUtils" class="com.lpq.personallibrary.util.PasswordHashUtils">
+        <property name="algorithmName" value="MD5"/>
+        <property name="hashIterations" value="2"/>
+    </bean>
+</beans>

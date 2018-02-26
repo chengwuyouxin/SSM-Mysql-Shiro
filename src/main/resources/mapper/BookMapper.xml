@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lpq.personallibrary.dao.BookMapper">
+	<resultMap id="BookResult" type="Book">
+		<result column="id" property="id" />
+		<result column="title" property="title" />
+		<result column="author" property="author" />
+		<result column="press" property="press" />
+		<result column="edition" property="edition" />
+		<result column="price" property="price" />
+		<result column="buy_date" property="buy_date" />
+		<result column="category" property="category" />
+		<result column="description" property="description" />
+	</resultMap>
+	<select id="getAllBooks" resultMap="BookResult">
+		select * from book
+	</select>
+	<select id="getBookById" resultMap="BookResult">
+		select * from book where id=#{id}
+	</select>
+	<insert id="addBook">
+        insert into book(title,author,press,edition,price,buy_date,category,description)
+        values(#{title},#{author},#{press},#{edition},#{price},#{buy_date},
+        #{category},#{description})
+    </insert>
+    <delete id="deleteBook">
+        delete from book where id=#{id}
+    </delete>
+    <update id="updateBook">
+        update book set title=#{title},author=#{author},press=#{press},
+        edition=#{edition},price=#{price},buy_date=#{buy_date},
+        category=#{category},description=#{description}
+        where id=#{id}
+    </update>
+</mapper>
